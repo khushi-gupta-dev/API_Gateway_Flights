@@ -8,7 +8,7 @@ const { successResponse , errorResponse } = require("../utils/common");
 //   email: "john.doe@example.com",
 //   password: "password123"
 // }
-async function signup(req, res) {
+async function signUp(req, res) {
   try {
     
     const user = await userService.create({
@@ -30,8 +30,32 @@ async function signup(req, res) {
 }
 }
 
+
+async function signIn(req, res) {
+  try {
+    
+    const user = await userService.signIn({
+    
+        email : req.body.email,
+        password : req.body.password,
+        });
+
+     successResponse.data = user
+    return res
+    .status(StatusCodes.CREATED)
+    .json(successResponse);
+  } catch (error) {
+      console.log(error);
+    errorResponse.error = error;
+  return  res
+    .status(error.statusCode)
+    .json(errorResponse);
+}
+}
+
 module.exports = {
-    signup
+  signUp,
+  signIn
 };
 
 
