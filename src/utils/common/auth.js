@@ -20,8 +20,18 @@ const { serverConfig } = require("../../config");
 
 }
 
+
+function verifyToken(token) {
+    try {
+        const response = jwt.verify(token, serverConfig.JWT_SECRET);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}
  module.exports = {
   
      checkPassword,
-     createToken
+     createToken,
+     verifyToken
 }; 
