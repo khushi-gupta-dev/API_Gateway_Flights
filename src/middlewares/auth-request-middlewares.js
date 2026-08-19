@@ -5,7 +5,9 @@ const AppError = require("../utils/errors/app-error");
 const { userService } = require("../services");
 function validateAuthRequest(req, res, next) {
 
-if(!req.body.email) {
+const requestBody = req.body || {};
+
+if(!requestBody.email ) {
     errorResponse.message = "Something went wrong while authenticating the user";
     errorResponse.error = new AppError(
       ["Email not found in the incoming request"],
@@ -17,7 +19,7 @@ if(!req.body.email) {
 
 
 
-if(!req.body.password) {
+if(!requestBody.password ) {
     errorResponse.message = "Something went wrong while authenticating the user";
     errorResponse.error = new AppError(
       ["password not found in the incoming request"],
