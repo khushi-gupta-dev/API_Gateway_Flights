@@ -47,17 +47,17 @@ async function checkAuth(req, res, next) {
 
 
 async function isAdmin(req, res, next) {
-
-  const response = await userService.isAdmin(req.user);
-  if(!response){
-    return res.status(StatusCodes.UNAUTHORIZED)
-    .json({message:"User not authorized for this action"});
-
-
-   
-    
+  try {
+    const response = await userService.isAdmin(req.user);
+    if (!response) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "User not authorized for this action" });
+    }
+    return next();
+  } catch (error) {
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message || "Could not verify administrator access",
+    });
 }
-next() ; 
   }
 
 

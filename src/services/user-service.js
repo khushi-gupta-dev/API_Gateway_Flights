@@ -134,11 +134,20 @@ catch (error) {
 }
 }
 
+async function getUserWithRoles(id) {
+  const user = await userRepo.getUserWithRoles(id);
+  if (!user) {
+    throw new AppError("No user found for the corresponding JWT token", StatusCodes.NOT_FOUND);
+  }
+  return { id: user.id, email: user.email, roles: user.role.map((role) => role.name) };
+}
+
 module.exports = {
   create,
   signIn,
   isAuthenticated,
   isAdmin,
-  addRoleToUser
+  addRoleToUser,
+  getUserWithRoles
   
 };

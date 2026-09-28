@@ -1,5 +1,5 @@
 const crudRepository = require('./crud-repository');
-const {User} = require('../models');
+const {User, Role} = require('../models');
 class userRepository extends crudRepository {
   constructor() {
     super(User);
@@ -13,6 +13,13 @@ class userRepository extends crudRepository {
     } catch (error) {
       throw error;
     }
+  }
+
+  async getUserWithRoles(id) {
+    return User.findByPk(id, {
+      attributes: ['id', 'email'],
+      include: [{ model: Role, as: 'role', attributes: ['name'], through: { attributes: [] } }],
+    });
   }
 }
 

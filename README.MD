@@ -111,9 +111,7 @@ The service manages user identities and permissions across three tables:
    - Returns `401 Unauthorized` if not an admin.
 
 ### Gateway-Protected Proxy Routes
-The gateway protects sensitive downstream flight management operations directly at the gateway layer:
-- `POST /flightsService/api/v1/flights` $\rightarrow$ `checkAuth` + `isAdmin`
-- `PATCH /flightsService/api/v1/flights/:id/seats` $\rightarrow$ `checkAuth` + `isAdmin`
+The gateway protects every mutating request under `/flightsService/api/v1/*` (`POST`, `PUT`, `PATCH`, and `DELETE`) with `checkAuth` and `isAdmin`. Read-only flight catalog requests remain public.
 
 ---
 
@@ -173,6 +171,21 @@ The gateway protects sensitive downstream flight management operations directly 
   - `400 Bad Request`: Invalid password or missing credentials.
   - `404 Not Found`: No user found with the specified email.
 
+#### Current User and Roles
+- **Method & Route:** `GET /api/v1/user/me`
+- **Access:** Private (valid JWT)
+- **Headers:** `x-access-token: <JWT_TOKEN>`
+- **Description:** Returns the authenticated user's ID, email, and current role names. The frontend uses this endpoint to select the correct post-login page and protect the admin dashboard.
+- **Success Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "message": "Successfully completed the request",
+  "data": { "id": 1, "email": "user@example.com", "roles": ["customer"] },
+  "error": {}
+}
+```
+
 ---
 
 #### 3. Assign Role to User
@@ -222,9 +235,8 @@ The gateway protects sensitive downstream flight management operations directly 
 
 | Gateway Path | Forwarded Target | Auth / Guards | Downstream Service |
 |---|---|---|---|
-| `POST /flightsService/api/v1/flights` | `http://localhost:3000/api/v1/flights` | `checkAuth`, `isAdmin` | Flights Service |
-| `PATCH /flightsService/api/v1/flights/:id/seats` | `http://localhost:3000/api/v1/flights/:id/seats` | `checkAuth`, `isAdmin` | Flights Service |
-| `ALL /flightsService/*` | `http://localhost:3000/*` | Public / Pass-through | Flights Service |
+| `POST`, `PUT`, `PATCH`, `DELETE /flightsService/api/v1/*` | `http://localhost:3000/*` | `checkAuth`, `isAdmin` | Flights Service |
+| `GET /flightsService/*` | `http://localhost:3000/*` | Public | Flights Service |
 | `ALL /bookingService/*` | `http://localhost:4000/*` | Pass-through | Flight Booking Service |
 
 ---

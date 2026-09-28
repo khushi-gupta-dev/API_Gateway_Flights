@@ -23,17 +23,12 @@ app.use(express.urlencoded({extended:true}));
 
 app.use(limiter);
 
-app.post(
-    "/flightsService/api/v1/flights",
-    authRequestMiddlewares.checkAuth,
-    authRequestMiddlewares.isAdmin,
-);
-
-app.patch(
-    "/flightsService/api/v1/flights/:id/seats",
-    authRequestMiddlewares.checkAuth,
-    authRequestMiddlewares.isAdmin,
-);
+app.use('/flightsService/api/v1', (req, res, next) => {
+    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
+    return authRequestMiddlewares.checkAuth(req, res, () =>
+        authRequestMiddlewares.isAdmin(req, res, next),
+    );
+});
 
 app.use('/flightsService' , createProxyMiddleware({target:serverConfig.FLIGHT_SERVICE , changeOrigin:true}));
 

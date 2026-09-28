@@ -76,10 +76,30 @@ async function addRoleToUser(req, res) {
 }
 }
 
+async function getCurrentUser(req, res) {
+  try {
+    const user = await userService.getUserWithRoles(req.user);
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Successfully completed the request",
+      data: user,
+      error: {},
+    });
+  } catch (error) {
+    return res.status( StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Could not load the current user",
+      data: {},
+      error: { message: error.message },
+    });
+  }
+}
+
 module.exports = {
   signUp,
   signIn,
-  addRoleToUser
+  addRoleToUser,
+  getCurrentUser
 };
 
 
