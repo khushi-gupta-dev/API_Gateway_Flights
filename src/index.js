@@ -2,7 +2,7 @@ const express = require("express");
 
 const rateLimit = require("express-rate-limit");
 
-const { createProxyMiddleware } = require("http-proxy-middleware");
+const { createProxyMiddleware, fixRequestBody } = require("http-proxy-middleware");
 
 const {serverConfig , logger}  = require("./config");
 const apiRoutes = require("./routes");
@@ -30,7 +30,11 @@ app.use('/flightsService/api/v1', (req, res, next) => {
     );
 });
 
-app.use('/flightsService' , createProxyMiddleware({target:serverConfig.FLIGHT_SERVICE , changeOrigin:true}));
+app.use('/flightsService', createProxyMiddleware({
+    target: serverConfig.FLIGHT_SERVICE,
+    changeOrigin: true,
+    on: { proxyReq: fixRequestBody },
+}));
 
 app.use('/bookingService' , createProxyMiddleware({target:serverConfig.BOOKING_SERVICE , changeOrigin:true}));
 
