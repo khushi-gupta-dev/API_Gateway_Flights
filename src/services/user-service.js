@@ -7,11 +7,15 @@ const userRepo = new userRepository();
 const roleRepo = new roleRepository();
 async function create(data) {
   try {
-    const user = await userRepo.create(data);
     const role = await roleRepo.getRoleByName(enums.user_roles_enums.CUSTOMER);
-    user.addRole(role);
+    if (!role) {
+      throw new AppError("Customer role is not configured", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+    const user = await userRepo.create(data);
+    await user.addRole(role);
     return user;
   } catch (error) {
+    if (error instanceof AppError) throw error;
     if (
       error.name == "SequelizeValidationError" ||
       error.name == "SequelizeUniqueConstraintError"
@@ -36,15 +40,15 @@ async function signIn(data) {
     const user = await userRepo.getUserByEmail(data.email);
     if (!user) {
       throw new AppError(
-        "No user found for the given email",
-        StatusCodes.NOT_FOUND,
+        "Invalid email or password",
+        StatusCodes.UNAUTHORIZED,
       );
     }
 
     const passwordMatch = auth.checkPassword(data.password, user.password);
 
     if (!passwordMatch) {
-      throw new AppError("Invalid password", StatusCodes.BAD_REQUEST);
+      throw new AppError("Invalid email or password", StatusCodes.UNAUTHORIZED);
     }
 
     const jwt = auth.createToken({ id: user.id, email: user.email });
@@ -100,7 +104,7 @@ async function addRoleToUser(data){
     if(!role){
       throw new AppError("No user found for the given role", StatusCodes.NOT_FOUND);
     }
-    user.addRole(role);
+    await user.addRole(role);
     return user ; 
 }
 catch (error) {

@@ -2,7 +2,14 @@ const { StatusCodes } = require("http-status-codes");
 
 const { userService } = require("../services");
 
-const { successResponse , errorResponse } = require("../utils/common");
+function sendError(res, error) {
+  return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+    success: false,
+    message: "Something went wrong",
+    data: {},
+    error: { message: error.message || "Unexpected error" },
+  });
+}
 // POST: /signup
 // req-body {
 //   email: "john.doe@example.com",
@@ -17,16 +24,14 @@ async function signUp(req, res) {
         password : req.body.password,
         });
 
-     successResponse.data = user
-    return res
-    .status(StatusCodes.CREATED)
-    .json(successResponse);
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: "Account created successfully",
+      data: { id: user.id, email: user.email },
+      error: {},
+    });
   } catch (error) {
-      console.log(error);
-    errorResponse.error = error;
-  return  res
-    .status(error.statusCode)
-    .json(errorResponse);
+    return sendError(res, error);
 }
 }
 
@@ -40,16 +45,14 @@ async function signIn(req, res) {
         password : req.body.password,
         });
 
-     successResponse.data = user
-    return res
-    .status(StatusCodes.CREATED)
-    .json(successResponse);
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Successfully completed the request",
+      data: user,
+      error: {},
+    });
   } catch (error) {
-      console.log(error);
-    errorResponse.error = error;
-  return  res
-    .status(error.statusCode)
-    .json(errorResponse);
+    return sendError(res, error);
 }
 }
 
@@ -63,16 +66,14 @@ async function addRoleToUser(req, res) {
         id : req.body.id,
         });
 
-     successResponse.data = user
-    return res
-    .status(StatusCodes.CREATED)
-    .json(successResponse);
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Role assigned successfully",
+      data: { id: user.id, email: user.email },
+      error: {},
+    });
   } catch (error) {
-      console.log(error);
-    errorResponse.error = error;
-  return  res
-    .status(error.statusCode)
-    .json(errorResponse);
+    return sendError(res, error);
 }
 }
 

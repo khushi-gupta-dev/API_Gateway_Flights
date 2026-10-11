@@ -12,7 +12,7 @@ const app = express();
 
 const limiter = rateLimit({
     windowMs: 2 * 60 * 1000, // 2 minutes
-    limit: 30, // Limit each IP to 2 requests per `window` (here, per 15 minutes)
+    limit: 120, // Supports normal multi-page use while still limiting bursts per IP.
 	
 });
 
@@ -36,7 +36,28 @@ app.use('/flightsService', createProxyMiddleware({
     on: { proxyReq: fixRequestBody },
 }));
 
-app.use('/bookingService' , createProxyMiddleware({target:serverConfig.BOOKING_SERVICE , changeOrigin:true}));
+// Booking ownership is always derived from the verified token, never a client supplied userId.
+app.use('/bookingService/api/v1/bookings', (req, res, next) =>
+    authRequestMiddlewares.checkAuth(req, res, () => {
+        const forwardBookingRequest = () => {
+            req.headers['x-user-id'] = String(req.user);
+            next();
+        };
+        const bookingPath = req.originalUrl.split('?')[0].replace(/\/+$/, '').toLowerCase();
+        const isAdminBookingList = req.method === 'GET'
+            && bookingPath === '/bookingservice/api/v1/bookings/admin';
+        if (isAdminBookingList) {
+            return authRequestMiddlewares.isAdmin(req, res, forwardBookingRequest);
+        }
+        return forwardBookingRequest();
+    }),
+);
+
+app.use('/bookingService', createProxyMiddleware({
+    target: serverConfig.BOOKING_SERVICE,
+    changeOrigin: true,
+    on: { proxyReq: fixRequestBody },
+}));
 
 app.use("/api", apiRoutes);
 

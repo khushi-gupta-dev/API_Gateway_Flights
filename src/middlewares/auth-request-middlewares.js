@@ -1,31 +1,28 @@
 const { StatusCodes } = require("http-status-codes");
-const { errorResponse } = require("../utils/common");
-
-const AppError = require("../utils/errors/app-error");
 const { userService } = require("../services");
 function validateAuthRequest(req, res, next) {
 
 const requestBody = req.body || {};
 
 if(!requestBody.email ) {
-    errorResponse.message = "Something went wrong while authenticating the user";
-    errorResponse.error = new AppError(
-      ["Email not found in the incoming request"],
-      StatusCodes.BAD_REQUEST,
-    );
-    return res.status(StatusCodes.BAD_REQUEST).json(errorResponse);
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: "Email not found in the incoming request",
+      data: {},
+      error: { message: "Email is required" },
+    });
   }
 
 
 
 
 if(!requestBody.password ) {
-    errorResponse.message = "Something went wrong while authenticating the user";
-    errorResponse.error = new AppError(
-      ["password not found in the incoming request"],
-      StatusCodes.BAD_REQUEST,
-    );
-    return res.status(StatusCodes.BAD_REQUEST).json(errorResponse);
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: "Password not found in the incoming request",
+      data: {},
+      error: { message: "Password is required" },
+    });
   }
   next();
 }
@@ -34,10 +31,11 @@ if(!requestBody.password ) {
 async function checkAuth(req, res, next) {
   try {
     const response = await userService.isAuthenticated(req.headers["x-access-token"]);
-    if (response) {
-      req.user = response          // setting the user id in the req object 
-      next();
+    if (!response) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Authentication required" });
     }
+    req.user = response;
+    return next();
   }catch (error) {
     return res.status(error.statusCode).json(error);
     
@@ -50,7 +48,7 @@ async function isAdmin(req, res, next) {
   try {
     const response = await userService.isAdmin(req.user);
     if (!response) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "User not authorized for this action" });
+    return res.status(StatusCodes.FORBIDDEN).json({ message: "User not authorized for this action" });
     }
     return next();
   } catch (error) {
