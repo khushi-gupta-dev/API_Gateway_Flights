@@ -10,6 +10,21 @@ const { authRequestMiddlewares } = require("./middlewares");
 
 const app = express();
 
+// Preserve the exact signed payload for Razorpay; this route is public and verified by Booking Service.
+app.use('/bookingService/webhooks/razorpay', express.raw({ type: 'application/json', limit: '1mb' }), createProxyMiddleware({
+    target: serverConfig.BOOKING_SERVICE,
+    changeOrigin: true,
+    pathRewrite: (path, req) => req.originalUrl.replace(/^\/bookingService/, ''),
+    on: {
+        proxyReq: (proxyReq, req) => {
+            if (!Buffer.isBuffer(req.body)) return;
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', req.body.length);
+            proxyReq.write(req.body);
+        },
+    },
+}));
+
 const limiter = rateLimit({
     windowMs: 2 * 60 * 1000, // 2 minutes
     limit: 120, // Supports normal multi-page use while still limiting bursts per IP.
