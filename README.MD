@@ -1,13 +1,15 @@
-﻿# API Gateway
+# API Gateway
 
-The gateway provides signup/login/current-user APIs, JWT authentication, admin checks, rate limiting, and proxies to Flights Service and Flight Booking Service.
+The gateway (default port `5000`) owns user authentication and role lookup, limits request rates, and proxies frontend traffic to Flights Service and Flight Booking Service.
 
-## Routing and access
+## Routes and access
 
-- `/api/v1/user/*`: authentication and user APIs.
-- `/flightsService/*`: public reads; admin authentication for POST/PUT/PATCH/DELETE under `/api/v1`.
-- `/bookingService/api/v1/bookings*`: requires authentication; gateway overwrites `x-user-id` from the verified token. The exact `GET /bookings/admin` route also requires the admin role.
+- `POST /api/v1/user/signup`, `POST /api/v1/user/signin`, `GET /api/v1/user/me`, `POST /api/v1/user/role` (admin only).
+- `/flightsService/*`: catalogue/search reads are public; POST, PUT, PATCH, and DELETE under `/api/v1` require an authenticated admin.
+- `/bookingService/api/v1/bookings*`: requires authentication. The gateway overwrites `x-user-id` with the verified user ID; `GET /bookingService/api/v1/bookings/admin` additionally requires admin role.
+
+Booking routes support creating a hold, demo payment, listing/viewing/cancelling a customer's own bookings, and admin booking review. Payment is simulated downstream.
 
 ## Run
 
-Configure `PORT`, `JWT_SECRET`, `JWT_EXPIRY`, `SALT_ROUNDS`, `FLIGHT_SERVICE`, `BOOKING_SERVICE`, and the MySQL database. Apply gateway migrations, then `npm run dev` (default port 5000).
+Configure `PORT`, `JWT_SECRET`, `JWT_EXPIRY`, `SALT_ROUNDS`, `FLIGHT_SERVICE`, `BOOKING_SERVICE`, and the gateway database in `src/config/config.json`. Apply gateway migrations and run `npm run dev`. Keep `.env` secrets local.

@@ -61,7 +61,9 @@ app.use('/bookingService', createProxyMiddleware({
 
 app.use("/api", apiRoutes);
 
-
+app.get("/", (req, res) => {
+    res.send("Welcome to the API Gateway");
+});
 
 // console.log(process.env);
 app.listen(serverConfig.PORT, () => {
