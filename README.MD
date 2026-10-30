@@ -6,6 +6,8 @@ The gateway (default port `5000`) owns user authentication and role lookup, limi
 
 - `POST /api/v1/user/signup`, `POST /api/v1/user/signin`, `GET /api/v1/user/me`, `POST /api/v1/user/role` (admin only).
 - `/flightsService/*`: catalogue/search reads are public; POST, PUT, PATCH, and DELETE under `/api/v1` require an authenticated admin.
+- Disruption simulator writes under `/flightsService/api/v1/disruptions` use the
+  same admin policy and receive the verified administrator ID as `x-user-id`.
 - `/bookingService/api/v1/bookings*`: requires authentication. The gateway overwrites `x-user-id` with the verified user ID; `GET /bookingService/api/v1/bookings/admin` additionally requires admin role.
 
 Booking routes support creating a hold, Razorpay Checkout, listing/viewing/cancelling a customer's own bookings, and admin booking review. The Gateway applies customer/admin authentication to booking APIs and forwards payment requests to Booking Service.

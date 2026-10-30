@@ -41,7 +41,10 @@ app.use(limiter);
 app.use('/flightsService/api/v1', (req, res, next) => {
     if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
     return authRequestMiddlewares.checkAuth(req, res, () =>
-        authRequestMiddlewares.isAdmin(req, res, next),
+        authRequestMiddlewares.isAdmin(req, res, () => {
+            req.headers['x-user-id'] = String(req.user);
+            return next();
+        }),
     );
 });
 
