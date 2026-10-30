@@ -9,4 +9,5 @@ module.exports = {
     JWT_EXPIRY: process.env.JWT_EXPIRY,
     FLIGHT_SERVICE: process.env.FLIGHT_SERVICE,
     BOOKING_SERVICE: process.env.BOOKING_SERVICE,
+    SUPPORT_SERVICE: process.env.SUPPORT_SERVICE || 'http://localhost:3003',
 }

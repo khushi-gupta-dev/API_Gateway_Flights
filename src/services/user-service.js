@@ -123,6 +123,20 @@ async function isAdmin(id){
   if(!user){
     throw new AppError("No user found for the given id", StatusCodes.NOT_FOUND);
   }
+
+  async function isCustomer(id) {
+    try {
+      const user = await userRepo.get(id);
+      if (!user) throw new AppError("No user found for the corresponding user id", StatusCodes.NOT_FOUND);
+      const customerRole = await roleRepo.getRoleByName(enums.user_roles_enums.CUSTOMER);
+      if (!customerRole) throw new AppError("Customer role is not configured", StatusCodes.INTERNAL_SERVER_ERROR);
+      const adminRole = await roleRepo.getRoleByName(enums.user_roles_enums.ADMIN);
+      return (await user.hasRole(customerRole)) && !(adminRole && await user.hasRole(adminRole));
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Something went wrong", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
   const adminRole = await roleRepo.getRoleByName(enums.user_roles_enums.ADMIN);
   if(!adminRole){
     throw new AppError("No user found for the given role", StatusCodes.NOT_FOUND);
@@ -151,6 +165,7 @@ module.exports = {
   signIn,
   isAuthenticated,
   isAdmin,
+  isCustomer,
   addRoleToUser,
   getUserWithRoles
   

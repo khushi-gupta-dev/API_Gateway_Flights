@@ -74,6 +74,18 @@ app.use('/bookingService', createProxyMiddleware({
     on: { proxyReq: fixRequestBody },
 }));
 
+app.use('/supportService/api/v1', (req, res, next) =>
+    authRequestMiddlewares.checkAuth(req, res, () =>
+        authRequestMiddlewares.isCustomer(req, res, next),
+    ),
+);
+
+app.use('/supportService', createProxyMiddleware({
+    target: serverConfig.SUPPORT_SERVICE,
+    changeOrigin: true,
+    on: { proxyReq: fixRequestBody },
+}));
+
 app.use("/api", apiRoutes);
 
 app.get("/", (req, res) => {
