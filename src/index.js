@@ -78,6 +78,15 @@ app.use('/bookingService/api/v1/recovery-cases', (req, res, next) =>
     }),
 );
 
+app.use('/bookingService/api/v1/recovery-operations', (req, res, next) =>
+    authRequestMiddlewares.checkAuth(req, res, () =>
+        authRequestMiddlewares.isAdmin(req, res, () => {
+            req.headers['x-user-id'] = String(req.user);
+            return next();
+        }),
+    ),
+);
+
 app.use('/bookingService', createProxyMiddleware({
     target: serverConfig.BOOKING_SERVICE,
     changeOrigin: true,

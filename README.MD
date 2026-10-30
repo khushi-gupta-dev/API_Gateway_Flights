@@ -11,6 +11,8 @@ The gateway (default port `5000`) owns user authentication and role lookup, limi
 - `/bookingService/api/v1/bookings*`: requires authentication. The gateway overwrites `x-user-id` with the verified user ID; `GET /bookingService/api/v1/bookings/admin` additionally requires admin role.
 - `/bookingService/api/v1/recovery-cases*`: requires authentication and
   forwards the verified customer ID as `x-user-id`.
+- `/bookingService/api/v1/recovery-operations*`: requires an authenticated
+  administrator and forwards the verified admin ID as `x-user-id`.
 
 Booking routes support creating a hold, Razorpay Checkout, listing/viewing/cancelling a customer's own bookings, and admin booking review. The Gateway applies customer/admin authentication to booking APIs and forwards payment requests to Booking Service.
 
