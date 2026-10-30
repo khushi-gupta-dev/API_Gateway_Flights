@@ -51,20 +51,6 @@ async function isAdmin(req, res, next) {
     return res.status(StatusCodes.FORBIDDEN).json({ message: "User not authorized for this action" });
     }
 
-    async function isCustomer(req, res, next) {
-      try {
-        const response = await userService.isCustomer(req.user);
-        if (!response) {
-          return res.status(StatusCodes.FORBIDDEN).json({ message: "Customer access required" });
-        }
-        req.headers["x-user-role"] = "customer";
-        return next();
-      } catch (error) {
-        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-          message: error.message || "Could not verify customer access",
-        });
-      }
-    }
     return next();
   } catch (error) {
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -73,8 +59,23 @@ async function isAdmin(req, res, next) {
 }
   }
 
+  async function isCustomer(req, res, next) {
+    try {
+      const response = await userService.isCustomer(req.user);
+      if (!response) {
+        return res.status(StatusCodes.FORBIDDEN).json({ message: "Customer access required" });
+      }
+      req.headers["x-user-role"] = "customer";
+      return next();
+    } catch (error) {
+      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message || "Could not verify customer access",
+      });
+    }
+  }
 
-module.exports = {
+
+  module.exports = {
   validateAuthRequest,
   checkAuth,
   isAdmin,

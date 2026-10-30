@@ -1,6 +1,6 @@
 # API Gateway
 
-The gateway (default port `5000`) owns user authentication and role lookup, limits request rates, and proxies frontend traffic to Flights Service, Flight Booking Service, and Support Service.
+The gateway (default port `5000`) owns user authentication and role lookup, limits request rates, and proxies frontend traffic to Flights Service, Flight Booking Service, and Support Service. It is the only backend origin used by the frontend in normal development.
 
 ## Routes and access
 
@@ -12,8 +12,8 @@ Booking routes support creating a hold, Razorpay Checkout, listing/viewing/cance
 
 `POST /bookingService/webhooks/razorpay` is the public Razorpay webhook path. The gateway preserves its raw JSON body and forwards it to Booking Service without customer JWT authentication; Booking Service verifies the webhook signature. Configure `payment.captured`, `payment.failed`, `refund.created`, `refund.processed`, and `refund.failed` in Razorpay Test Mode.
 
-`/supportService/api/v1/*` requires an authenticated customer account before proxying AI assistance to Support Service. Set `SUPPORT_SERVICE` (default `http://localhost:3003`) in the Gateway environment. Support Service applies its own chat request limit.
+`/supportService/api/v1/*` requires an authenticated non-admin customer account before proxying AI assistance to Support Service. The gateway forwards a trusted customer-role header after validating the JWT; direct clients cannot grant themselves access. Set `SUPPORT_SERVICE` (default `http://localhost:3003`) in the Gateway environment. Support Service applies its own chat request limit.
 
 ## Run
 
-Configure `PORT`, `JWT_SECRET`, `JWT_EXPIRY`, `SALT_ROUNDS`, `FLIGHT_SERVICE`, `BOOKING_SERVICE`, optional `SUPPORT_SERVICE`, and the gateway database in `src/config/config.json`/environment. Apply gateway migrations and run `npm run dev`. Keep `.env` secrets local.
+Configure `PORT` (default `5000`), `JWT_SECRET`, `JWT_EXPIRY`, `SALT_ROUNDS`, `FLIGHT_SERVICE` (default `http://localhost:3001`), `BOOKING_SERVICE` (default `http://localhost:4000`), optional `SUPPORT_SERVICE` (default `http://localhost:3003`), and the gateway database in `src/config/config.json`/environment. Apply gateway migrations and run `npm run dev`. Keep `.env` secrets local.
