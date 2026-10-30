@@ -71,6 +71,13 @@ app.use('/bookingService/api/v1/bookings', (req, res, next) =>
     }),
 );
 
+app.use('/bookingService/api/v1/recovery-cases', (req, res, next) =>
+    authRequestMiddlewares.checkAuth(req, res, () => {
+        req.headers['x-user-id'] = String(req.user);
+        return next();
+    }),
+);
+
 app.use('/bookingService', createProxyMiddleware({
     target: serverConfig.BOOKING_SERVICE,
     changeOrigin: true,
